@@ -89,7 +89,7 @@ div.eble-alter {
   z-index: 99;
   background-color: #fff;
   box-shadow: 0 5px 20px #ddd;
-  transition: top ease-in 0.1s, opacity ease-in 0.3s;
+  transition: top ease-in 0.1s, opacity ease-in 0.2s;
   opacity: 0;
 }
 .eble-alter.eble-alter-display {

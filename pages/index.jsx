@@ -2,38 +2,9 @@ import React, { Component } from "react";
 
 import Less from "./less";
 import Greater from "./greater";
+import AlterFun from "./alterFun";
 
 import "./pages.css";
-
-function AlterFun(props) {
-  return (
-    <div
-      className={`eble-alter ${props.alterBool ? "eble-alter-display" : null}`}
-    >
-      <svg
-        t="1553238219192"
-        className="icon"
-        viewBox="0 0 1024 1024"
-        version="1.1"
-        xmlns="http://www.w3.org/2000/svg"
-        p-id="1152"
-        width="40"
-        height="40"
-      >
-        <defs>
-          <style type="text/css" />
-        </defs>
-        <path
-          d="M512 139.636364L81.454545 884.363636h863.418182L512 139.636364z m37.236364 307.2l-9.309091 242.036363h-58.181818l-9.309091-242.036363h76.8z m-34.909091 356.072727c-13.963636 0-25.6-4.654545-32.581818-11.636364-9.309091-6.981818-11.636364-16.290909-11.636364-27.927272s4.654545-20.945455 11.636364-27.927273c9.309091-6.981818 18.618182-11.636364 30.254545-11.636364s23.272727 4.654545 30.254545 11.636364c6.981818 6.981818 11.636364 16.290909 11.636364 27.927273s-4.654545 20.945455-11.636364 27.927272c-6.981818 9.309091-16.290909 11.636364-27.927272 11.636364z"
-          fill="#f4ea2a"
-          p-id="1153"
-        />
-      </svg>
-      <p>{props.alterText}</p>
-      <button onClick={props.closeAlter}>Sure</button>
-    </div>
-  );
-}
 
 class Paging extends Component {
   constructor(props) {
@@ -44,7 +15,8 @@ class Paging extends Component {
       chooseNumber: 1,
       jumpNumber: "",
       alterBool: false,
-      alterText: ""
+      alterText: "",
+      alterTimer: null
     };
     this.changeNumber = this.changeNumber.bind(this);
     this.addSubtractFun = this.addSubtractFun.bind(this);
@@ -66,11 +38,21 @@ class Paging extends Component {
     }
     return null;
   }
+  componentWillUnmount() {
+    if (this.state.alterTimer) {
+      clearTimeout(this.state.alterTimer);
+    }
+  }
   closeAlter() {
     this.setState({ alterBool: false });
+    clearTimeout(this.state.alterTimer);
   }
   callbackFun(performFun) {
-    if (performFun) {
+    const isPerformFun = Object.prototype.toString.call(performFun);
+    if (
+      isPerformFun !== "[object Undefined]" &&
+      isPerformFun === "[object Function]"
+    ) {
       performFun(this.state.chooseNumber);
     }
   }
@@ -110,6 +92,29 @@ class Paging extends Component {
       this.setState({
         alterText: `Please enter number from 1 ~ ${this.props.pagesNumber}`
       });
+      if (this.state.alterTimer) {
+        clearTimeout(this.state.alterTimer);
+      }
+      this.setState({
+        alterTimer: setTimeout(() => {
+          this.setState({ alterBool: false });
+        }, 2000)
+      });
+      const isDisplayAlter = Object.prototype.toString.call(
+        this.props.isDisplayAlter
+      );
+      const isCustomAlterFun = Object.prototype.toString.call(
+        this.props.customAlterFun
+      );
+      if (
+        isDisplayAlter !== "[object Undefined]" &&
+        isDisplayAlter === "[object Boolean]" &&
+        !this.props.isDisplayAlter &&
+        isCustomAlterFun !== "[object Undefined]" &&
+        isCustomAlterFun === "[object Function]"
+      ) {
+        this.props.customAlterFun();
+      }
     }
   }
   render() {
@@ -148,6 +153,14 @@ class Paging extends Component {
       onlyOneBool !== "[object Undefined]" && onlyOneBool === "[object Boolean]"
         ? this.props.onlyOneBool
         : false;
+    const isDisplayAlter = Object.prototype.toString.call(
+      this.props.isDisplayAlter
+    );
+    const displayAlter =
+      isDisplayAlter !== "[object Undefined]" &&
+      isDisplayAlter === "[object Boolean]"
+        ? this.props.isDisplayAlter
+        : true;
     if (!onlyOne && this.props.pagesNumber === 1) {
       return null;
     }
@@ -229,12 +242,14 @@ class Paging extends Component {
             </li>
           ) : null}
         </ul>
-        <AlterFun
-          alterText={alterText}
-          alterBool={alterBool}
-          closeAlter={this.closeAlter}
-          {...this.props}
-        />
+        {displayAlter ? (
+          <AlterFun
+            alterText={alterText}
+            alterBool={alterBool}
+            closeAlter={this.closeAlter}
+            {...this.props}
+          />
+        ) : null}
       </div>
     );
   }
