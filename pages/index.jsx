@@ -5,6 +5,36 @@ import Greater from "./greater";
 
 import "./pages.css";
 
+function AlterFun(props) {
+  return (
+    <div
+      className={`eble-alter ${props.alterBool ? "eble-alter-display" : null}`}
+    >
+      <svg
+        t="1553238219192"
+        className="icon"
+        viewBox="0 0 1024 1024"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        p-id="1152"
+        width="40"
+        height="40"
+      >
+        <defs>
+          <style type="text/css" />
+        </defs>
+        <path
+          d="M512 139.636364L81.454545 884.363636h863.418182L512 139.636364z m37.236364 307.2l-9.309091 242.036363h-58.181818l-9.309091-242.036363h76.8z m-34.909091 356.072727c-13.963636 0-25.6-4.654545-32.581818-11.636364-9.309091-6.981818-11.636364-16.290909-11.636364-27.927272s4.654545-20.945455 11.636364-27.927273c9.309091-6.981818 18.618182-11.636364 30.254545-11.636364s23.272727 4.654545 30.254545 11.636364c6.981818 6.981818 11.636364 16.290909 11.636364 27.927273s-4.654545 20.945455-11.636364 27.927272c-6.981818 9.309091-16.290909 11.636364-27.927272 11.636364z"
+          fill="#f4ea2a"
+          p-id="1153"
+        />
+      </svg>
+      <p>{props.alterText}</p>
+      <button onClick={props.closeAlter}>Sure</button>
+    </div>
+  );
+}
+
 class Paging extends Component {
   constructor(props) {
     super(props);
@@ -12,13 +42,16 @@ class Paging extends Component {
       pagesNumber: 0,
       pagesArr: [],
       chooseNumber: 1,
-      jumpNumber: ""
+      jumpNumber: "",
+      alterBool: false,
+      alterText: ""
     };
     this.changeNumber = this.changeNumber.bind(this);
     this.addSubtractFun = this.addSubtractFun.bind(this);
     this.jumpNumberFun = this.jumpNumberFun.bind(this);
     this.inputNumber = this.inputNumber.bind(this);
     this.callbackFun = this.callbackFun.bind(this);
+    this.closeAlter = this.closeAlter.bind(this);
   }
   static getDerivedStateFromProps(props, state) {
     if (props.pagesNumber !== state.pagesNumber) {
@@ -32,6 +65,9 @@ class Paging extends Component {
       };
     }
     return null;
+  }
+  closeAlter() {
+    this.setState({ alterBool: false });
   }
   callbackFun(performFun) {
     if (performFun) {
@@ -69,10 +105,22 @@ class Paging extends Component {
       this.setState({ chooseNumber: jumpNumber }, () => {
         this.callbackFun(performFun);
       });
+    } else {
+      this.setState({ alterBool: true });
+      this.setState({
+        alterText: `Please enter number from 1 ~ ${this.props.pagesNumber}`
+      });
     }
   }
   render() {
-    const { pagesNumber, pagesArr, chooseNumber, jumpNumber } = this.state;
+    const {
+      pagesNumber,
+      pagesArr,
+      chooseNumber,
+      jumpNumber,
+      alterBool,
+      alterText
+    } = this.state;
     const firstLastPageIsBool = Object.prototype.toString.call(
       this.props.firstLastPage
     );
@@ -95,6 +143,14 @@ class Paging extends Component {
       jumpPageIsBool === "[object Boolean]"
         ? this.props.jumpPage
         : false;
+    const onlyOneBool = Object.prototype.toString.call(this.props.onlyOneBool);
+    const onlyOne =
+      onlyOneBool !== "[object Undefined]" && onlyOneBool === "[object Boolean]"
+        ? this.props.onlyOneBool
+        : false;
+    if (!onlyOne && this.props.pagesNumber === 1) {
+      return null;
+    }
     return (
       <div className="eble-page">
         <ul className="eble-page-ul">
@@ -156,13 +212,13 @@ class Paging extends Component {
           ) : null}
           {jumpPage ? (
             <li className="jump-page">
-              跳转&nbsp;
+              Jump&nbsp;
               <input
                 type="text"
                 value={jumpNumber}
                 onChange={even => this.inputNumber(even)}
               />
-              &nbsp;页
+              &nbsp;page
               <button
                 onClick={even =>
                   this.jumpNumberFun(this.props.performFun, even)
@@ -173,6 +229,12 @@ class Paging extends Component {
             </li>
           ) : null}
         </ul>
+        <AlterFun
+          alterText={alterText}
+          alterBool={alterBool}
+          closeAlter={this.closeAlter}
+          {...this.props}
+        />
       </div>
     );
   }
